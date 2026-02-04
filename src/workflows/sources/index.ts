@@ -3,6 +3,7 @@ import { getByPath } from "../../lib/objectPath";
 import { WorkflowConfig } from "../types";
 import { fetchGameRes } from "./gameres";
 import { fetchGnn } from "./gnn";
+import { fetchGamek } from "./gamek";
 import { fetchSina } from "./sina";
 import { fetchDy } from "./dy";
 import { fetchSohuBrowser } from "./sohuBrowser";
@@ -11,6 +12,7 @@ import { fetchAfkLichgame } from "./afkLichgame";
 import { fetchAfkGameh5 } from "./afkGameh5";
 import { fetchAfkGamemobile } from "./afkGamemobile";
 import { fetchAfkTopgame } from "./afkTopgame";
+import { fetchAfkTinGame } from "./afkTinGame";
 
 export async function fetchWorkflowItems(
   workflow: WorkflowConfig,
@@ -108,6 +110,36 @@ export async function fetchWorkflowItems(
         maxItems: opts.limit,
         detailDelayMs: workflow.source.detailDelayMs,
         detailRetries: workflow.source.detailRetries,
+        waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
+        userAgent: workflow.source.userAgent
+      },
+      { onProgress: opts.onProgress }
+    );
+  }
+
+  if (workflow.source.type === "gamek") {
+    const startUrls = workflow.source.startUrls;
+    if (!Array.isArray(startUrls) || startUrls.length === 0) {
+      throw new Error(`Workflow "${workflow.id}": source.startUrls is required`);
+    }
+
+    const maxItems =
+      typeof opts.limit === "number"
+        ? Math.min(workflow.source.maxItems ?? opts.limit, opts.limit)
+        : workflow.source.maxItems;
+
+    return await fetchGamek(
+      {
+        type: "gamek",
+        startUrls,
+        pageFrom: workflow.source.pageFrom,
+        pageTo: workflow.source.pageTo,
+        loadMoreClicks: workflow.source.loadMoreClicks,
+        loadMoreSelector: workflow.source.loadMoreSelector,
+        loadMoreWaitMs: workflow.source.loadMoreWaitMs,
+        maxItems,
+        requestDelayMs: workflow.source.requestDelayMs,
+        retries: workflow.source.retries,
         waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
         userAgent: workflow.source.userAgent
       },
@@ -294,6 +326,32 @@ export async function fetchWorkflowItems(
         userAgent: workflow.source.userAgent,
         detailDelayMs: workflow.source.detailDelayMs,
         detailRetries: workflow.source.detailRetries
+      },
+      { onProgress: opts.onProgress }
+    );
+  }
+
+  if (workflow.source.type === "afkTinGame") {
+    if (!workflow.source.listUrlTemplate) {
+      throw new Error(`Workflow "${workflow.id}": source.listUrlTemplate is required`);
+    }
+
+    const maxItems =
+      typeof opts.limit === "number"
+        ? Math.min(workflow.source.maxItems ?? opts.limit, opts.limit)
+        : workflow.source.maxItems;
+
+    return await fetchAfkTinGame(
+      {
+        type: "afkTinGame",
+        listUrlTemplate: workflow.source.listUrlTemplate,
+        pageFrom: workflow.source.pageFrom,
+        pageTo: workflow.source.pageTo,
+        maxItems,
+        requestDelayMs: workflow.source.requestDelayMs,
+        retries: workflow.source.retries,
+        waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
+        userAgent: workflow.source.userAgent
       },
       { onProgress: opts.onProgress }
     );

@@ -49,6 +49,21 @@ export type GnnSource = {
   userAgent?: string;
 };
 
+export type GamekSource = {
+  type: "gamek";
+  startUrls: string[];
+  pageFrom?: number; // default 1 when pagination is enabled
+  pageTo?: number; // default pageFrom
+  loadMoreClicks?: number; // only used for homepage (no paging)
+  loadMoreSelector?: string; // optional selector for "Xem thêm"
+  loadMoreWaitMs?: number; // wait after each click
+  maxItems?: number; // stop early after reaching this many items (useful for preview)
+  requestDelayMs?: number; // delay between start urls
+  retries?: number; // retries per url (after first failure)
+  waitBetweenTriesMs?: number;
+  userAgent?: string;
+};
+
 export type SinaSource = {
   type: "sina";
   startUrl: string; // e.g. https://www.sina.com.cn/
@@ -138,6 +153,18 @@ export type AfkTopgameSource = {
   detailRetries?: number;
 };
 
+export type AfkTinGameSource = {
+  type: "afkTinGame";
+  listUrlTemplate: string; // e.g. https://afkmobi.com/tin-game/page/{page}
+  pageFrom?: number; // default 1
+  pageTo?: number; // default pageFrom
+  maxItems?: number; // stop early after reaching this many items (useful for preview)
+  requestDelayMs?: number; // delay between list page fetches
+  retries?: number; // retries per page (after first failure)
+  waitBetweenTriesMs?: number;
+  userAgent?: string;
+};
+
 export type WorkflowConfig = {
   id: string;
   enabled: boolean;
@@ -148,13 +175,15 @@ export type WorkflowConfig = {
     | SohuBrowserSource
     | GameResSource
     | GnnSource
+    | GamekSource
     | SinaSource
     | DySource
     | FxbaogaoArchiveSource
     | AfkLichgameSource
     | AfkGameh5Source
     | AfkGamemobileSource
-    | AfkTopgameSource;
+    | AfkTopgameSource
+    | AfkTinGameSource;
   responsePath?: string; // required for http source
   transform: string;
   sheets: {

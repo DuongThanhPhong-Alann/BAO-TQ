@@ -1,0 +1,28 @@
+{
+  "id": "afk-tin-game",
+  "enabled": true,
+  "source": {
+    "type": "afkTinGame",
+    "listUrlTemplate": "https://afkmobi.com/tin-game/page/{page}",
+    "pageFrom": 1,
+    "pageTo": 21,
+    "requestDelayMs": 1000,
+    "retries": 1,
+    "waitBetweenTriesMs": 5000,
+    "userAgent": "Mozilla/5.0"
+  },
+  "transform": "afkTinGame",
+  "sheets": {
+    "spreadsheetId": "1wzx4dNC-hIYSjZBMnJM6jsXFWlInCgwxOGisv6Ey81g",
+    "sheetName": "AFK",
+    "keyColumn": "link",
+    "columns": {
+      "link": "link",
+      "title": "title",
+      "posting_date": "posting date",
+      "image": "image",
+      "caption": "caption",
+      "extracted_at": "extracted_at"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import type { AnyNode } from "domhandler";
 import { logger } from "../../logger";
 import { AfkGameh5Source } from "../types";
 
@@ -66,14 +67,14 @@ async function fetchPageHtml(params: {
   });
 }
 
-function extractCategory(li: cheerio.Cheerio<cheerio.Element>): string {
+function extractCategory(li: cheerio.Cheerio<AnyNode>): string {
   const linkText = cleanText(li.find("a").first().text());
   if (linkText) return linkText;
   const text = cleanText(li.text());
   return text.replace(/Thể loại\s*:/i, "").trim();
 }
 
-function extractCapacity(li: cheerio.Cheerio<cheerio.Element>): string {
+function extractCapacity(li: cheerio.Cheerio<AnyNode>): string {
   const text = cleanText(li.text());
   return text.replace(/Dung lượng\s*:/i, "").trim();
 }

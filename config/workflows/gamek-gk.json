@@ -1,0 +1,36 @@
+{
+  "id": "gamek-gk",
+  "enabled": true,
+  "source": {
+    "type": "gamek",
+    "startUrls": [
+      "https://gamek.vn/",
+      "https://gamek.vn/mobile-social.chn",
+      "https://gamek.vn/esport.chn",
+      "https://gamek.vn/kham-pha.chn",
+      "https://gamek.vn/manga-film.chn",
+      "https://gamek.vn/hong.chn",
+      "https://gamek.vn/cong-dong-mang.htm"
+    ],
+    "pageFrom": 2,
+    "pageTo": 10,
+    "loadMoreClicks": 9,
+    "requestDelayMs": 1000,
+    "retries": 1,
+    "waitBetweenTriesMs": 5000,
+    "userAgent": "Mozilla/5.0"
+  },
+  "transform": "gamek",
+  "sheets": {
+    "spreadsheetId": "1wzx4dNC-hIYSjZBMnJM6jsXFWlInCgwxOGisv6Ey81g",
+    "sheetName": "GK",
+    "keyColumn": "link",
+    "columns": {
+      "link": "link",
+      "title": "title",
+      "posting_date": "posting date",
+      "image": "image",
+      "extracted_at": "extracted_at"
+    }
+  }
+}
