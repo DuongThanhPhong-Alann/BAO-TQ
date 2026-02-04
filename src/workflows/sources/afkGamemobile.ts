@@ -8,6 +8,10 @@ type AfkGamemobileItem = {
   game_image: string;
   category: string;
   capacity: string;
+  language?: string[];
+  graphics?: string;
+  vote?: string;
+  installation_file?: string;
 };
 
 function cleanText(input?: string | null): string {
@@ -123,6 +127,83 @@ function parsePage(html: string, pageUrl: string): AfkGamemobileItem[] {
   return items;
 }
 
+function extractLabelValue(text: string, labelRegex: RegExp): string {
+  const cleaned = cleanText(text);
+  if (!cleaned) return "";
+  return cleaned.replace(labelRegex, "").trim();
+}
+
+function extractLanguages($: cheerio.CheerioAPI): string[] {
+  const langs: string[] = [];
+  $("li").each((_, el) => {
+    const li = $(el);
+    const text = cleanText(li.text());
+    if (!/Ngôn ngữ/i.test(text)) return;
+
+    li.find("img").each((__, img) => {
+      const src = cleanText($(img).attr("src"));
+      const alt = cleanText($(img).attr("alt"));
+      if (/eng-active/i.test(src) || /england|english/i.test(alt)) langs.push("English");
+      if (/vn-active/i.test(src) || /vietnam/i.test(alt)) langs.push("Việt Nam");
+    });
+  });
+  return [...new Set(langs)];
+}
+
+function extractGraphics($: cheerio.CheerioAPI): string {
+  let graphics = "";
+  $("li").each((_, el) => {
+    const li = $(el);
+    const text = cleanText(li.text());
+    if (!text) return;
+    if (/Đồ ho[ạa]/i.test(text)) {
+      graphics = extractLabelValue(text, /^Đồ ho[ạa]\s*:\s*/i);
+    }
+  });
+  return graphics;
+}
+
+function extractVote($: cheerio.CheerioAPI): string {
+  const voteText = cleanText($(".kksr-legend").first().text());
+  return voteText;
+}
+
+function extractInstallLinks($: cheerio.CheerioAPI): string {
+  const parts: string[] = [];
+  $(".btn_link_tai a[href]").each((_, el) => {
+    const a = $(el);
+    const href = cleanText(a.attr("href"));
+    if (!href) return;
+    const img = a.find("img").first();
+    const imgSrc = cleanText(img.attr("src"));
+    let label = "Link";
+    if (/android-icon/i.test(imgSrc)) label = "Android";
+    else if (/ios-icon/i.test(imgSrc)) label = "IOS";
+    else if (/apk-icon/i.test(imgSrc)) label = "APK";
+    parts.push(`${label}: ${href}`);
+  });
+  return parts.join("\n");
+}
+
+async function fetchDetail(params: {
+  url: string;
+  userAgent: string;
+  retries: number;
+  waitBetweenTriesMs: number;
+}): Promise<
+  Pick<AfkGamemobileItem, "language" | "graphics" | "vote" | "installation_file">
+> {
+  const html = await fetchPageHtml(params);
+  const $ = cheerio.load(html);
+
+  const language = extractLanguages($);
+  const graphics = extractGraphics($);
+  const vote = extractVote($);
+  const installation_file = extractInstallLinks($);
+
+  return { language, graphics, vote, installation_file };
+}
+
 export async function fetchAfkGamemobile(
   source: AfkGamemobileSource,
   opts: { onProgress?: (p: { current: number; total: number; text?: string }) => void } = {}
@@ -138,6 +219,8 @@ export async function fetchAfkGamemobile(
   const retries = source.retries ?? 0;
   const waitBetweenTriesMs = source.waitBetweenTriesMs ?? 5000;
   const maxItems = source.maxItems;
+  const detailDelayMs = source.detailDelayMs ?? 0;
+  const detailRetries = source.detailRetries ?? 0;
 
   const out: AfkGamemobileItem[] = [];
   const seen = new Set<string>();
@@ -165,6 +248,7 @@ export async function fetchAfkGamemobile(
         if (seen.has(item.link)) continue;
         seen.add(item.link);
         out.push(item);
+        logger.info({ index: out.length, url: item.link }, "AFK gamemobile: collected item");
         if (typeof maxItems === "number" && out.length >= maxItems) {
           logger.info({ items: out.length }, "AFK gamemobile: reached maxItems");
           return out;
@@ -175,6 +259,30 @@ export async function fetchAfkGamemobile(
     }
 
     if (requestDelayMs > 0 && page < pageTo) await sleep(requestDelayMs);
+  }
+
+  for (let i = 0; i < out.length; i++) {
+    const item = out[i];
+    if (!item.link) continue;
+    logger.info(
+      { index: i + 1, total: out.length, url: item.link },
+      "AFK gamemobile: fetching detail"
+    );
+    try {
+      const detail = await fetchDetail({
+        url: item.link,
+        userAgent,
+        retries: detailRetries,
+        waitBetweenTriesMs
+      });
+      item.language = detail.language;
+      item.graphics = detail.graphics;
+      item.vote = detail.vote;
+      item.installation_file = detail.installation_file;
+    } catch (err) {
+      logger.warn({ err, url: item.link }, "AFK gamemobile: failed to fetch detail");
+    }
+    if (detailDelayMs > 0 && i < out.length - 1) await sleep(detailDelayMs);
   }
 
   logger.info({ items: out.length }, "AFK gamemobile: collected items");

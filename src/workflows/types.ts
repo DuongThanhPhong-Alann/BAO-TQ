@@ -105,6 +105,8 @@ export type AfkGameh5Source = {
   retries?: number; // retries per page (after first failure)
   waitBetweenTriesMs?: number;
   userAgent?: string;
+  detailDelayMs?: number;
+  detailRetries?: number;
 };
 
 export type AfkGamemobileSource = {
@@ -117,6 +119,8 @@ export type AfkGamemobileSource = {
   retries?: number; // retries per page (after first failure)
   waitBetweenTriesMs?: number;
   userAgent?: string;
+  detailDelayMs?: number;
+  detailRetries?: number;
 };
 
 export type AfkTopgameSource = {

@@ -30,6 +30,12 @@ function normalizeImageUrl(input: unknown): string {
   return img;
 }
 
+function normalizeLanguage(input: unknown): string {
+  const items = Array.isArray(input) ? input : typeof input === "string" ? [input] : [];
+  const cleaned = items.map(cleanText).filter(Boolean);
+  return [...new Set(cleaned)].join(", ");
+}
+
 export function transformAfkGameh5(item: any): Record<string, unknown> {
   const imageUrl = normalizeImageUrl(item?.game_image ?? item?.image ?? "");
   const imageFormula = imageUrl ? `=IMAGE("${imageUrl}")` : "";
@@ -40,6 +46,10 @@ export function transformAfkGameh5(item: any): Record<string, unknown> {
     game_image: imageFormula,
     category: item?.category ?? "",
     capacity: item?.capacity ?? "",
+    language: normalizeLanguage(item?.language),
+    graphics: item?.graphics ?? "",
+    vote: item?.vote ?? "",
+    installation_file: item?.installation_file ?? "",
     fetch_time: formatNowHCM()
   };
 }

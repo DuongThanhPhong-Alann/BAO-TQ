@@ -9,7 +9,10 @@ type AfkTopgameItem = {
   game_image: string;
   category: string;
   capacity: string;
-  needsDetail?: boolean;
+  language?: string[];
+  graphics?: string;
+  vote?: string;
+  installation_file?: string;
 };
 
 function cleanText(input?: string | null): string {
@@ -71,28 +74,93 @@ function extractCapacityFromText(text: string): string {
   return "";
 }
 
-async function fetchDetailCapacity(params: {
+function extractLabelValue(text: string, labelRegex: RegExp): string {
+  const cleaned = cleanText(text);
+  if (!cleaned) return "";
+  return cleaned.replace(labelRegex, "").trim();
+}
+
+function extractLanguages($: cheerio.CheerioAPI): string[] {
+  const langs: string[] = [];
+  $("li").each((_, el) => {
+    const li = $(el);
+    const text = cleanText(li.text());
+    if (!/Ngôn ngữ/i.test(text)) return;
+
+    li.find("img").each((__, img) => {
+      const src = cleanText($(img).attr("src"));
+      const alt = cleanText($(img).attr("alt"));
+      if (/eng-active/i.test(src) || /england|english/i.test(alt)) langs.push("English");
+      if (/vn-active/i.test(src) || /vietnam/i.test(alt)) langs.push("Việt Nam");
+    });
+  });
+  return [...new Set(langs)];
+}
+
+function extractGraphics($: cheerio.CheerioAPI): string {
+  let graphics = "";
+  $("li").each((_, el) => {
+    const li = $(el);
+    const text = cleanText(li.text());
+    if (!text) return;
+    if (/Đồ ho[ạa]/i.test(text)) {
+      graphics = extractLabelValue(text, /^Đồ ho[ạa]\s*:\s*/i);
+    }
+  });
+  return graphics;
+}
+
+function extractVote($: cheerio.CheerioAPI): string {
+  const voteText = cleanText($(".kksr-legend").first().text());
+  return voteText;
+}
+
+function extractInstallLinks($: cheerio.CheerioAPI): string {
+  const parts: string[] = [];
+  $(".btn_link_tai a[href]").each((_, el) => {
+    const a = $(el);
+    const href = cleanText(a.attr("href"));
+    if (!href) return;
+    const img = a.find("img").first();
+    const imgSrc = cleanText(img.attr("src"));
+    let label = "Link";
+    if (/android-icon/i.test(imgSrc)) label = "Android";
+    else if (/ios-icon/i.test(imgSrc)) label = "IOS";
+    else if (/apk-icon/i.test(imgSrc)) label = "APK";
+    parts.push(`${label}: ${href}`);
+  });
+  return parts.join("\n");
+}
+
+function extractCapacityFromDetail($: cheerio.CheerioAPI): string {
+  const candidates = $("span.entry-date, .entry-date, li").toArray();
+  for (const el of candidates) {
+    const text = cleanText($(el).text());
+    if (!/Dung lượng/i.test(text)) continue;
+    const extracted = extractCapacityFromText(text);
+    if (extracted) return extracted;
+  }
+  return "";
+}
+
+async function fetchDetail(params: {
   url: string;
   userAgent: string;
   retries: number;
   waitBetweenTriesMs: number;
-}): Promise<string> {
+}): Promise<
+  Pick<AfkTopgameItem, "language" | "graphics" | "vote" | "installation_file" | "capacity">
+> {
   const html = await fetchPageHtml(params);
   const $ = cheerio.load(html);
-  let capacity = "";
 
-  const candidates = $("span.entry-date, .entry-date").toArray();
-  for (const el of candidates) {
-    const text = cleanText($(el).text());
-    if (!text) continue;
-    const extracted = extractCapacityFromText(text);
-    if (extracted) {
-      capacity = extracted;
-      break;
-    }
-  }
+  const language = extractLanguages($);
+  const graphics = extractGraphics($);
+  const vote = extractVote($);
+  const installation_file = extractInstallLinks($);
+  const capacity = extractCapacityFromDetail($);
 
-  return capacity;
+  return { language, graphics, vote, installation_file, capacity };
 }
 
 function parsePage(html: string, pageUrl: string): AfkTopgameItem[] {
@@ -135,8 +203,7 @@ function parsePage(html: string, pageUrl: string): AfkTopgameItem[] {
       namegame,
       game_image,
       category,
-      capacity: "",
-      needsDetail: true
+      capacity: ""
     });
   });
 
@@ -172,8 +239,7 @@ function parsePage(html: string, pageUrl: string): AfkTopgameItem[] {
       namegame,
       game_image,
       category,
-      capacity,
-      needsDetail: false
+      capacity
     });
   }
 
@@ -239,15 +305,23 @@ export async function fetchAfkTopgame(
 
   for (let i = 0; i < out.length; i++) {
     const item = out[i];
-    if (!item.needsDetail) continue;
+    if (!item.link) continue;
+    logger.info(
+      { index: i + 1, total: out.length, url: item.link },
+      "AFK topgame: fetching detail"
+    );
     try {
-      const capacity = await fetchDetailCapacity({
+      const detail = await fetchDetail({
         url: item.link,
         userAgent,
         retries: detailRetries,
         waitBetweenTriesMs
       });
-      if (capacity) item.capacity = capacity;
+      item.language = detail.language;
+      item.graphics = detail.graphics;
+      item.vote = detail.vote;
+      item.installation_file = detail.installation_file;
+      if (detail.capacity) item.capacity = detail.capacity;
     } catch (err) {
       logger.warn({ err, url: item.link }, "AFK topgame: failed to fetch detail");
     }

@@ -234,7 +234,9 @@ export async function fetchWorkflowItems(
         requestDelayMs: workflow.source.requestDelayMs,
         retries: workflow.source.retries,
         waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
-        userAgent: workflow.source.userAgent
+        userAgent: workflow.source.userAgent,
+        detailDelayMs: workflow.source.detailDelayMs,
+        detailRetries: workflow.source.detailRetries
       },
       { onProgress: opts.onProgress }
     );
@@ -260,7 +262,9 @@ export async function fetchWorkflowItems(
         requestDelayMs: workflow.source.requestDelayMs,
         retries: workflow.source.retries,
         waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
-        userAgent: workflow.source.userAgent
+        userAgent: workflow.source.userAgent,
+        detailDelayMs: workflow.source.detailDelayMs,
+        detailRetries: workflow.source.detailRetries
       },
       { onProgress: opts.onProgress }
     );

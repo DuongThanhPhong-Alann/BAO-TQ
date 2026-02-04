@@ -28,6 +28,10 @@
       "game_image": "Game_image",
       "category": "Category",
       "capacity": "Capacity",
+      "language": "language",
+      "graphics": "Graphics",
+      "vote": "Vote",
+      "installation_file": "installation_file",
       "fetch_time": "Fetch_time"
     }
   }

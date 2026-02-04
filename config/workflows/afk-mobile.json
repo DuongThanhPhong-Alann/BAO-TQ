@@ -11,7 +11,9 @@
     "requestDelayMs": 1000,
     "retries": 1,
     "waitBetweenTriesMs": 5000,
-    "userAgent": "Mozilla/5.0"
+    "userAgent": "Mozilla/5.0",
+    "detailDelayMs": 1000,
+    "detailRetries": 1
   },
   "transform": "afkGamemobile",
   "sheets": {
@@ -24,6 +26,10 @@
       "game_image": "Game_image",
       "category": "Category",
       "capacity": "Capacity",
+      "language": "language",
+      "graphics": "Graphics",
+      "vote": "Vote",
+      "installation_file": "installation_file",
       "fetch_time": "Fetch_time"
     }
   }
