@@ -117,6 +117,7 @@ function extractVote($: cheerio.CheerioAPI): string {
 
 function extractInstallLinks($: cheerio.CheerioAPI): string {
   const parts: string[] = [];
+  const seen = new Set<string>();
   $(".btn_link_tai a[href]").each((_, el) => {
     const a = $(el);
     const href = cleanText(a.attr("href"));
@@ -127,6 +128,9 @@ function extractInstallLinks($: cheerio.CheerioAPI): string {
     if (/android-icon/i.test(imgSrc)) label = "Android";
     else if (/ios-icon/i.test(imgSrc)) label = "IOS";
     else if (/apk-icon/i.test(imgSrc)) label = "APK";
+    const key = `${label}|${href}`;
+    if (seen.has(key)) return;
+    seen.add(key);
     parts.push(`${label}: ${href}`);
   });
   return parts.join("\n");
