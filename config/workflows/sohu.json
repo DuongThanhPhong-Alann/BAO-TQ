@@ -1,0 +1,33 @@
+{
+  "id": "sohu",
+  "enabled": true,
+  "cron": "0 0 18 * * 0",
+  "scheduleTimezone": "Asia/Ho_Chi_Minh",
+  "source": {
+    "type": "sohuBrowser",
+    "startUrls": ["https://www.sohu.com/"],
+    "linkSelector": "ul.news[data-spm=\"top-news1\"] a.titleStyle",
+    "linkAttribute": "href",
+    "maxLinks": 50,
+    "detailConcurrency": 1,
+    "detailDelayMs": 3000,
+    "detailRetries": 2,
+    "waitBetweenTriesMs": 5000,
+    "headless": true
+  },
+  "transform": "sohu",
+  "sheets": {
+    "spreadsheetId": "1wzx4dNC-hIYSjZBMnJM6jsXFWlInCgwxOGisv6Ey81g",
+    "sheetName": "sohu",
+    "keyColumn": "link",
+    "columns": {
+      "link": "link",
+      "title": "title",
+      "location": "location",
+      "image": " image",
+      "extracted_at": "extracted_at",
+      "time": "posting date",
+      "description": "description"
+    }
+  }
+}

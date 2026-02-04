@@ -1,0 +1,35 @@
+{
+  "id": "sina",
+  "enabled": true,
+  "cron": "0 0 2 * * *",
+  "scheduleTimezone": "Asia/Ho_Chi_Minh",
+  "source": {
+    "type": "sina",
+    "startUrl": "https://www.sina.com.cn/",
+    "linkSelectors": [
+      "ul.list-a.slide-a.list-a-201406121603",
+      "ul.bd.list-b",
+      "ul.uni-blk-list02.list-a"
+    ],
+    "maxLinks": 50,
+    "detailConcurrency": 1,
+    "detailDelayMs": 1000,
+    "detailRetries": 2,
+    "waitBetweenTriesMs": 5000,
+    "userAgent": "Mozilla/5.0"
+  },
+  "transform": "sina",
+  "sheets": {
+    "spreadsheetId": "1wzx4dNC-hIYSjZBMnJM6jsXFWlInCgwxOGisv6Ey81g",
+    "sheetName": "sina",
+    "keyColumn": "link",
+    "columns": {
+      "link": "link",
+      "title": "title",
+      "time": "time",
+      "image": "image",
+      "extractedAt": "extractedAt"
+    }
+  }
+}
+

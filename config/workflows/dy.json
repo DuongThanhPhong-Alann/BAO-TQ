@@ -1,0 +1,26 @@
+{
+  "id": "dy",
+  "enabled": true,
+  "cron": "0 0 4 * * *",
+  "scheduleTimezone": "Asia/Ho_Chi_Minh",
+  "source": {
+    "type": "dy",
+    "startUrl": "https://www.163.com/dy/media/T1440040368953.html",
+    "maxItems": 100,
+    "userAgent": "Mozilla/5.0"
+  },
+  "transform": "dy",
+  "sheets": {
+    "spreadsheetId": "1wzx4dNC-hIYSjZBMnJM6jsXFWlInCgwxOGisv6Ey81g",
+    "sheetName": "dy",
+    "keyColumn": "link",
+    "columns": {
+      "link": "link",
+      "title": "title",
+      "image": "image",
+      "time": "posting date",
+      "extracted_at": "extracted_at"
+    }
+  }
+}
+

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.env.*
+secrets/
+GOOGLE_SERVICE_ACCOUNT*.json
+npm-debug.log*
+.DS_Store

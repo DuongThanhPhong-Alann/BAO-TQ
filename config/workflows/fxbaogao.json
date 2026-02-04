@@ -1,0 +1,31 @@
+{
+  "id": "fxbaogao",
+  "enabled": true,
+  "cron": "0 0 3 * * *",
+  "scheduleTimezone": "Asia/Ho_Chi_Minh",
+  "source": {
+    "type": "fxbaogaoArchive",
+    "listUrlTemplate": "https://www.fxbaogao.com/archives/organization/%E5%9B%BD%E4%BF%A1%E8%AF%81%E5%88%B8?page={page}",
+    "pageFrom": 1,
+    "pageTo": 22,
+    "requestDelayMs": 1000,
+    "retries": 1,
+    "waitBetweenTriesMs": 5000,
+    "userAgent": "Mozilla/5.0",
+    "upsertPerPage": true
+  },
+  "transform": "fxbaogao",
+  "sheets": {
+    "spreadsheetId": "1wzx4dNC-hIYSjZBMnJM6jsXFWlInCgwxOGisv6Ey81g",
+    "sheetName": "fxbaogao",
+    "keyColumn": "link",
+    "columns": {
+      "link": "link",
+      "title": "title",
+      "posting_date": "posting date",
+      "image": "image",
+      "extracted_at": "extracted_at"
+    }
+  }
+}
+

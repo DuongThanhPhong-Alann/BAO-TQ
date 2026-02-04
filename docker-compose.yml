@@ -1,0 +1,10 @@
+services:
+  bao-tq:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ./secrets/google-service-account.json:/run/secrets/google-service-account.json:ro
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/google-service-account.json
+    restart: unless-stopped

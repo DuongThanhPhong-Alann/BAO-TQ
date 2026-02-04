@@ -1,0 +1,30 @@
+{
+  "id": "gameres",
+  "enabled": true,
+  "cron": "0 0 21 * * *",
+  "scheduleTimezone": "Asia/Ho_Chi_Minh",
+  "source": {
+    "type": "gameres",
+    "startUrl": "https://www.gameres.com/",
+    "batchSize": 50,
+    "detailConcurrency": 1,
+    "detailDelayMs": 10000,
+    "detailRetries": 2,
+    "waitBetweenTriesMs": 5000,
+    "userAgent": "Mozilla/5.0"
+  },
+  "transform": "gameres",
+  "sheets": {
+    "spreadsheetId": "1wzx4dNC-hIYSjZBMnJM6jsXFWlInCgwxOGisv6Ey81g",
+    "sheetName": "gameres",
+    "keyColumn": "link",
+    "columns": {
+      "link": "link",
+      "title": "title",
+      "description": "description",
+      "posting date": "posting date",
+      "extracted_at": "extracted_at"
+    }
+  }
+}
+

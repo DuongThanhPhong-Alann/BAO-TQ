@@ -1,0 +1,41 @@
+{
+  "id": "gnn",
+  "enabled": true,
+  "cron": "0 0 1 * * *",
+  "scheduleTimezone": "Asia/Ho_Chi_Minh",
+  "source": {
+    "type": "gnn",
+    "userAgent": "Mozilla/5.0",
+    "maxLinksPerSection": 50,
+    "detailDelayMs": 1000,
+    "detailRetries": 2,
+    "waitBetweenTriesMs": 5000,
+    "sections": [
+      { "startUrl": "https://gnn.gamer.com.tw/", "source": "gamer-GNN新聞" },
+      { "startUrl": "https://gnn.gamer.com.tw/index.php?k=4", "source": "gamer-手機" },
+      { "startUrl": "https://gnn.gamer.com.tw/index.php?k=1", "source": "gamer-PC" },
+      { "startUrl": "https://gnn.gamer.com.tw/index.php?k=5", "source": "gamer-動漫畫" },
+      { "startUrl": "https://gnn.gamer.com.tw/index.php?k=3", "source": "gamer-TV 掌機" },
+      { "startUrl": "https://gnn.gamer.com.tw/index.php?k=11", "source": "gamer-活動展覽" },
+      { "startUrl": "https://gnn.gamer.com.tw/index.php?k=13", "source": "gamer-電競" },
+      { "startUrl": "https://gnn.gamer.com.tw/index.php?k=9", "source": "gamer-主題報導" }
+    ]
+  },
+  "transform": "gnn",
+  "sheets": {
+    "spreadsheetId": "1wzx4dNC-hIYSjZBMnJM6jsXFWlInCgwxOGisv6Ey81g",
+    "sheetName": "GNN",
+    "keyColumn": "link",
+    "columns": {
+      "link": "link",
+      "title": "title",
+      "time": "time",
+      "category": "category",
+      "hashtag": "hashtag",
+      "imgFormula": "image",
+      "source": "source",
+      "extractedAt": "extractedAt"
+    }
+  }
+}
+

@@ -1,0 +1,42 @@
+{
+  "name": "bao-tq",
+  "version": "1.0.0",
+  "description": "News scraping + Google Sheets sync (replacement for n8n workflows)",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "list": "node dist/index.js list",
+    "run:sohu": "node dist/index.js run sohu",
+    "run:gameres": "node dist/index.js run gameres",
+    "run:gnn": "node dist/index.js run gnn",
+    "run:fxbaogao": "node dist/index.js run fxbaogao",
+    "run:dy": "node dist/index.js run dy",
+    "run:afk-lichgame": "node dist/index.js run afk-lichgame",
+    "run:afk-h5": "node dist/index.js run afk-h5",
+    "run:afk-mobile": "node dist/index.js run afk-mobile",
+    "run:afk-topgame": "node dist/index.js run afk-topgame",
+    "schedule": "node dist/index.js schedule"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "dotenv": "^17.2.3",
+    "googleapis": "^170.0.0",
+    "node-cron": "^4.2.1",
+    
+    "pino": "^10.1.1",
+    "playwright": "^1.57.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.6",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

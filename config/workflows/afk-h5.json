@@ -1,0 +1,30 @@
+{
+  "id": "afk-h5",
+  "enabled": true,
+  "cron": "0 30 5 * * *",
+  "scheduleTimezone": "Asia/Ho_Chi_Minh",
+  "source": {
+    "type": "afkGameh5",
+    "listUrlTemplate": "https://afkmobi.com/gameh5?page={page}",
+    "pageFrom": 1,
+    "pageTo": 10,
+    "requestDelayMs": 1000,
+    "retries": 1,
+    "waitBetweenTriesMs": 5000,
+    "userAgent": "Mozilla/5.0"
+  },
+  "transform": "afkGameh5",
+  "sheets": {
+    "spreadsheetId": "1f1Rhrg1fp_i4REE4wNEXl3CuMQ9KLS0OJPOCY_3uxxQ",
+    "sheetName": "AFK_H5",
+    "keyColumn": "Link",
+    "columns": {
+      "link": "Link",
+      "namegame": "Namegame",
+      "game_image": "Game_image",
+      "category": "Category",
+      "capacity": "Capacity",
+      "fetch_time": "Fetch_time"
+    }
+  }
+}
