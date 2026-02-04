@@ -119,6 +119,7 @@ export type AfkGamemobileSource = {
   retries?: number; // retries per page (after first failure)
   waitBetweenTriesMs?: number;
   userAgent?: string;
+  detailConcurrency?: number;
   detailDelayMs?: number;
   detailRetries?: number;
 };

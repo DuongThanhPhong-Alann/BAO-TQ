@@ -219,6 +219,7 @@ export async function fetchAfkGamemobile(
   const retries = source.retries ?? 0;
   const waitBetweenTriesMs = source.waitBetweenTriesMs ?? 5000;
   const maxItems = source.maxItems;
+  const detailConcurrency = Math.max(1, source.detailConcurrency ?? 1);
   const detailDelayMs = source.detailDelayMs ?? 0;
   const detailRetries = source.detailRetries ?? 0;
 
@@ -261,29 +262,39 @@ export async function fetchAfkGamemobile(
     if (requestDelayMs > 0 && page < pageTo) await sleep(requestDelayMs);
   }
 
-  for (let i = 0; i < out.length; i++) {
-    const item = out[i];
-    if (!item.link) continue;
-    logger.info(
-      { index: i + 1, total: out.length, url: item.link },
-      "AFK gamemobile: fetching detail"
-    );
-    try {
-      const detail = await fetchDetail({
-        url: item.link,
-        userAgent,
-        retries: detailRetries,
-        waitBetweenTriesMs
-      });
-      item.language = detail.language;
-      item.graphics = detail.graphics;
-      item.vote = detail.vote;
-      item.installation_file = detail.installation_file;
-    } catch (err) {
-      logger.warn({ err, url: item.link }, "AFK gamemobile: failed to fetch detail");
+  let nextIndex = 0;
+  async function runWorker(workerId: number): Promise<void> {
+    while (true) {
+      const i = nextIndex++;
+      if (i >= out.length) return;
+      const item = out[i];
+      if (!item?.link) continue;
+
+      logger.info(
+        { index: i + 1, total: out.length, url: item.link, worker: workerId },
+        "AFK gamemobile: fetching detail"
+      );
+      try {
+        const detail = await fetchDetail({
+          url: item.link,
+          userAgent,
+          retries: detailRetries,
+          waitBetweenTriesMs
+        });
+        item.language = detail.language;
+        item.graphics = detail.graphics;
+        item.vote = detail.vote;
+        item.installation_file = detail.installation_file;
+      } catch (err) {
+        logger.warn({ err, url: item.link, worker: workerId }, "AFK gamemobile: failed to fetch detail");
+      }
+
+      if (detailDelayMs > 0) await sleep(detailDelayMs);
     }
-    if (detailDelayMs > 0 && i < out.length - 1) await sleep(detailDelayMs);
   }
+
+  const workers = Array.from({ length: detailConcurrency }, (_, idx) => runWorker(idx + 1));
+  await Promise.all(workers);
 
   logger.info({ items: out.length }, "AFK gamemobile: collected items");
   return out;
