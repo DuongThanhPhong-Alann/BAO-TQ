@@ -239,6 +239,7 @@ export async function fetchWorkflowItems(
         retries: workflow.source.retries,
         waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
         userAgent: workflow.source.userAgent,
+        detailConcurrency: workflow.source.detailConcurrency,
         detailDelayMs: workflow.source.detailDelayMs,
         detailRetries: workflow.source.detailRetries
       },
@@ -267,6 +268,7 @@ export async function fetchWorkflowItems(
         retries: workflow.source.retries,
         waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
         userAgent: workflow.source.userAgent,
+        detailConcurrency: workflow.source.detailConcurrency,
         detailDelayMs: workflow.source.detailDelayMs,
         detailRetries: workflow.source.detailRetries
       },
@@ -324,6 +326,7 @@ export async function fetchWorkflowItems(
         retries: workflow.source.retries,
         waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
         userAgent: workflow.source.userAgent,
+        detailConcurrency: workflow.source.detailConcurrency,
         detailDelayMs: workflow.source.detailDelayMs,
         detailRetries: workflow.source.detailRetries
       },

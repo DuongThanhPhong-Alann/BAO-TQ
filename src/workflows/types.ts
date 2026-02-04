@@ -106,6 +106,7 @@ export type AfkLichgameSource = {
   retries?: number; // retries per page (after first failure)
   waitBetweenTriesMs?: number;
   userAgent?: string;
+  detailConcurrency?: number;
   detailDelayMs?: number;
   detailRetries?: number;
 };
@@ -120,6 +121,7 @@ export type AfkGameh5Source = {
   retries?: number; // retries per page (after first failure)
   waitBetweenTriesMs?: number;
   userAgent?: string;
+  detailConcurrency?: number;
   detailDelayMs?: number;
   detailRetries?: number;
 };
@@ -149,6 +151,7 @@ export type AfkTopgameSource = {
   retries?: number; // retries per page (after first failure)
   waitBetweenTriesMs?: number;
   userAgent?: string;
+  detailConcurrency?: number;
   detailDelayMs?: number;
   detailRetries?: number;
 };
