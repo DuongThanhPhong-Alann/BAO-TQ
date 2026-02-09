@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { scheduleAllbao } from "./allbao";
 import { scheduleAllWorkflows } from "./scheduler";
 import { loadWorkflows } from "./workflows/loader";
 import { runWorkflowById } from "./workflows/runner";
@@ -12,12 +13,14 @@ function usage(): never {
       "  npm run dev -- run <workflowId>",
       "  npm run dev -- preview <workflowId> [limit]",
       "  npm run dev -- schedule",
+      "  npm run dev -- schedule-allbao [HH:MM]",
       "",
       "Built (prod):",
       "  node dist/index.js list",
       "  node dist/index.js run sohu",
       "  node dist/index.js preview sohu 5",
-      "  node dist/index.js schedule"
+      "  node dist/index.js schedule",
+      "  node dist/index.js schedule-allbao 09:21"
     ].join("\n")
   );
   process.exit(2);
@@ -53,6 +56,12 @@ async function main() {
 
   if (command === "schedule") {
     await scheduleAllWorkflows(workflows);
+    return;
+  }
+
+  if (command === "schedule-allbao") {
+    const time = arg1;
+    await scheduleAllbao(workflows, { time, runOnStart: false });
     return;
   }
 

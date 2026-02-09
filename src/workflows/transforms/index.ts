@@ -10,6 +10,7 @@ import { transformAfkGameh5 } from "./afkGameh5";
 import { transformAfkGamemobile } from "./afkGamemobile";
 import { transformAfkTopgame } from "./afkTopgame";
 import { transformAfkTinGame } from "./afkTinGame";
+import { transformGamelook } from "./gamelook";
 
 export type TransformFn = (item: any) => Record<string, unknown>;
 
@@ -26,5 +27,6 @@ export function getTransform(name: string): TransformFn {
   if (name === "afkGamemobile") return transformAfkGamemobile;
   if (name === "afkTopgame") return transformAfkTopgame;
   if (name === "afkTinGame") return transformAfkTinGame;
+  if (name === "gamelook") return transformGamelook;
   throw new Error(`Unknown transform "${name}"`);
 }

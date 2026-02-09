@@ -21,7 +21,14 @@
     "run:afk-topgame": "node dist/index.js run afk-topgame",
     "prerun:afk-tin-game": "npm run build",
     "run:afk-tin-game": "node dist/index.js run afk-tin-game",
-    "schedule": "node dist/index.js schedule"
+    "prerun:gamelook": "npm run build",
+    "run:gamelook": "node dist/index.js run gamelook",
+    "run:sina": "node dist/index.js run sina",
+    "preallbao": "npm run build",
+    "allbao": "npm run run:sohu && npm run run:gameres && npm run run:gnn && npm run run:fxbaogao && npm run run:dy && npm run run:afk-tin-game && npm run run:gamelook && npm run run:sina",
+    "schedule": "node dist/index.js schedule",
+    "preschedule:allbao": "npm run build",
+    "schedule:allbao": "node dist/index.js schedule-allbao 09:22"
   },
   "keywords": [],
   "author": "",

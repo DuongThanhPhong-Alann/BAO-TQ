@@ -1,5 +1,7 @@
 import * as cheerio from "cheerio";
+import { chromium } from "playwright";
 import { logger } from "../../logger";
+import { readHtmlResponse } from "../../lib/encoding";
 import { SinaSource } from "../types";
 
 async function sleep(ms: number): Promise<void> {
@@ -96,37 +98,123 @@ function looksLikeArticle(url: string): boolean {
   }
 }
 
-async function fetchHomepageLinks(params: {
-  startUrl: string;
-  userAgent: string;
-  linkSelectors: string[];
-}): Promise<string[]> {
-  const res = await fetch(params.startUrl, { headers: { "user-agent": params.userAgent } });
-  if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+function isSinaArticleHost(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  return h.endsWith(".sina.com.cn") || h === "sina.com.cn" || h.endsWith(".sina.cn") || h === "sina.cn";
+}
 
-  const html = await res.text();
-  const $ = cheerio.load(html);
+function parseListLinksFromHtml(params: {
+  html: string;
+  pageUrl: string;
+  linkSelectors?: string[];
+}): string[] {
+  const $ = cheerio.load(params.html);
+  const base = new URL(params.pageUrl);
 
-  const base = new URL(params.startUrl);
   const raw: string[] = [];
 
-  for (const sel of params.linkSelectors) {
+  if (Array.isArray(params.linkSelectors) && params.linkSelectors.length > 0) {
+    for (const sel of params.linkSelectors) {
+      raw.push(
+        ...$(sel)
+          .find("a[href]")
+          .map((_, el) => $(el).attr("href") || "")
+          .get()
+      );
+    }
+  } else {
     raw.push(
-      ...$(sel)
-        .find("a[href]")
+      ...$("a[href]")
         .map((_, el) => $(el).attr("href") || "")
         .get()
     );
   }
 
-  return uniq(
+  const out = uniq(
     raw
       .map((h) => absolutize(base, h))
       .filter(Boolean)
       .map((u) => stripTracking(u as string))
       .filter(looksLikeArticle)
+      .filter((u) => {
+        try {
+          return isSinaArticleHost(new URL(u).hostname);
+        } catch {
+          return false;
+        }
+      })
       .map((u) => u.split("#")[0])
   );
+
+  return out;
+}
+
+async function fetchHomepageLinks(params: {
+  startUrl: string;
+  userAgent: string;
+  linkSelectors?: string[];
+}): Promise<string[]> {
+  const res = await fetch(params.startUrl, { headers: { "user-agent": params.userAgent } });
+  if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+
+  const html = await readHtmlResponse(res);
+  return parseListLinksFromHtml({ html, pageUrl: params.startUrl, linkSelectors: params.linkSelectors });
+}
+
+async function fetchFeedCardPageLinks(params: {
+  startUrl: string;
+  userAgent: string;
+  headless: boolean;
+  pageFrom: number;
+  pageTo: number;
+  linkSelectors?: string[];
+}): Promise<string[]> {
+  const browser = await chromium.launch({ headless: params.headless });
+  const context = await browser.newContext({ userAgent: params.userAgent });
+  const page = await context.newPage();
+  try {
+    await page.goto(params.startUrl, { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(1000);
+
+    const collected: string[] = [];
+    const seen = new Set<string>();
+
+    const toDataPage = (pageNum: number) => Math.max(0, pageNum - 1);
+    const from = Math.max(1, params.pageFrom);
+    const to = Math.max(from, params.pageTo);
+
+    for (let p = from; p <= to; p++) {
+      const dataPage = toDataPage(p);
+      const selector = `.feed-card-page span.pagebox_num[data-page="${dataPage}"] a`;
+
+      if (p > from) {
+        const handle = await page.$(selector);
+        if (!handle) break;
+
+        await handle.click();
+        // wait for the "current page" marker to update (best-effort)
+        await page.waitForTimeout(1200);
+      }
+
+      const html = await page.content();
+      const links = parseListLinksFromHtml({
+        html,
+        pageUrl: params.startUrl,
+        linkSelectors: params.linkSelectors
+      });
+      for (const link of links) {
+        if (seen.has(link)) continue;
+        seen.add(link);
+        collected.push(link);
+      }
+    }
+
+    return collected;
+  } finally {
+    await page.close().catch(() => undefined);
+    await context.close().catch(() => undefined);
+    await browser.close().catch(() => undefined);
+  }
 }
 
 async function fetchSinaDetail(params: {
@@ -146,7 +234,7 @@ async function fetchSinaDetail(params: {
     return r;
   });
 
-  const html = await res.text();
+  const html = await readHtmlResponse(res);
   const $ = cheerio.load(html);
 
   const canonical =
@@ -195,13 +283,57 @@ export async function fetchSina(
   const detailDelayMs = source.detailDelayMs ?? 1000;
   const detailRetries = source.detailRetries ?? 0;
   const waitBetweenTriesMs = source.waitBetweenTriesMs ?? 5000;
-  const linkSelectors = source.linkSelectors ?? [
+  const defaultSelectors = [
     "ul.list-a.slide-a.list-a-201406121603",
     "ul.bd.list-b",
     "ul.uni-blk-list02.list-a"
   ];
 
-  const links = (await fetchHomepageLinks({ startUrl: source.startUrl, userAgent, linkSelectors }))
+  const sections =
+    Array.isArray(source.sections) && source.sections.length > 0
+      ? source.sections
+      : source.startUrl
+        ? [
+            {
+              startUrl: source.startUrl,
+              linkSelectors: source.linkSelectors ?? defaultSelectors
+            }
+          ]
+        : [];
+
+  if (sections.length === 0) {
+    throw new Error('Sina: "sections" or "startUrl" is required');
+  }
+
+  const allLinks: string[] = [];
+  for (const section of sections) {
+    try {
+      if (section.pagination?.type === "feedCardPage") {
+        const pageFrom = section.pagination.pageFrom ?? 1;
+        const pageTo = section.pagination.pageTo ?? pageFrom;
+        const links = await fetchFeedCardPageLinks({
+          startUrl: section.startUrl,
+          userAgent,
+          headless: source.headless ?? true,
+          pageFrom,
+          pageTo,
+          linkSelectors: section.linkSelectors
+        });
+        allLinks.push(...links);
+      } else {
+        const links = await fetchHomepageLinks({
+          startUrl: section.startUrl,
+          userAgent,
+          linkSelectors: section.linkSelectors
+        });
+        allLinks.push(...links);
+      }
+    } catch (err) {
+      logger.warn({ err, startUrl: section.startUrl }, "Sina: failed to fetch section links");
+    }
+  }
+
+  const links = uniq(allLinks)
     .slice(0, maxLinks)
     .map((u) => u.split("#")[0]);
 
@@ -247,4 +379,3 @@ export async function fetchSina(
 
   return items.filter(Boolean);
 }
-

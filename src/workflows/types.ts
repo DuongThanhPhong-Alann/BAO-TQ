@@ -66,14 +66,24 @@ export type GamekSource = {
 
 export type SinaSource = {
   type: "sina";
-  startUrl: string; // e.g. https://www.sina.com.cn/
+  startUrl?: string; // e.g. https://www.sina.com.cn/
   linkSelectors?: string[]; // where to collect article links from the homepage
+  sections?: Array<{
+    startUrl: string;
+    linkSelectors?: string[];
+    pagination?: {
+      type: "feedCardPage";
+      pageFrom?: number; // default 1
+      pageTo?: number; // default pageFrom
+    };
+  }>;
   maxLinks?: number;
   detailConcurrency?: number;
   detailDelayMs?: number; // delay between detail fetches (when concurrency=1)
   detailRetries?: number; // number of retries after first failure
   waitBetweenTriesMs?: number;
   userAgent?: string;
+  headless?: boolean; // for browser pagination (Playwright)
 };
 
 export type DySource = {
@@ -168,6 +178,21 @@ export type AfkTinGameSource = {
   userAgent?: string;
 };
 
+export type GamelookSource = {
+  type: "gamelook";
+  listUrlTemplate: string; // e.g. http://www.gamelook.com.cn/page/{page}/
+  pageFrom?: number; // default 1
+  pageTo?: number; // default pageFrom
+  maxItems?: number; // stop early after reaching this many items (useful for preview)
+  requestDelayMs?: number; // delay between list page fetches
+  retries?: number; // retries per page (after first failure)
+  waitBetweenTriesMs?: number;
+  userAgent?: string;
+  detailConcurrency?: number;
+  detailDelayMs?: number;
+  detailRetries?: number;
+};
+
 export type WorkflowConfig = {
   id: string;
   enabled: boolean;
@@ -186,7 +211,8 @@ export type WorkflowConfig = {
     | AfkGameh5Source
     | AfkGamemobileSource
     | AfkTopgameSource
-    | AfkTinGameSource;
+    | AfkTinGameSource
+    | GamelookSource;
   responsePath?: string; // required for http source
   transform: string;
   sheets: {

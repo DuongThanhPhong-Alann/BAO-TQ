@@ -74,3 +74,8 @@ docker compose up -d --build
 
 - Workflow `sohu` hiện đang lấy link theo selector `ul.news[data-spm="top-news1"] a.titleStyle` trên `https://www.sohu.com/` và fetch từng bài để lấy `h1`, `#news-time`, `div.area > span:last-child`, `meta[name="description"]`, `og:image`.
 - Nếu site chặn/rate-limit, dùng `detailDelayMs`, `detailRetries`, `waitBetweenTriesMs` trong file workflow.
+
+## Workflow `gamelook`
+
+- Config: `config/workflows/gamelook.json` (sheet tab `gamelook`, cột: `link`, `title`, `posting_date`, `description`, `extracted_at`, `image`)
+- Nguồn: list page `http://www.gamelook.com.cn/page/{page}/` lấy link theo selector `h2.item-title a`, sau đó fetch từng bài để lấy `h1`, meta description, ảnh trong `div.entry img` (ưu tiên `data-original`).

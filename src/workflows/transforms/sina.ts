@@ -1,3 +1,5 @@
+import { formatExtractedAtHCM } from "../../lib/time";
+
 function normalizeUrl(url: unknown): string | null {
   if (typeof url !== "string") return null;
   const u = url.trim();
@@ -13,6 +15,6 @@ export function transformSina(item: any): Record<string, unknown> {
     title: item?.title ?? null,
     time: item?.time ?? null,
     image: imageUrl ? `=IMAGE("${imageUrl}")` : null,
-    extractedAt: new Date().toISOString()
+    extractedAt: formatExtractedAtHCM()
   };
 }

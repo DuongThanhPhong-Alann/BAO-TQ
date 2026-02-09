@@ -13,6 +13,7 @@ import { fetchAfkGameh5 } from "./afkGameh5";
 import { fetchAfkGamemobile } from "./afkGamemobile";
 import { fetchAfkTopgame } from "./afkTopgame";
 import { fetchAfkTinGame } from "./afkTinGame";
+import { fetchGamelook } from "./gamelook";
 
 export async function fetchWorkflowItems(
   workflow: WorkflowConfig,
@@ -148,8 +149,11 @@ export async function fetchWorkflowItems(
   }
 
   if (workflow.source.type === "sina") {
-    if (!workflow.source.startUrl) {
-      throw new Error(`Workflow "${workflow.id}": source.startUrl is required`);
+    if (
+      !workflow.source.startUrl &&
+      (!Array.isArray(workflow.source.sections) || workflow.source.sections.length === 0)
+    ) {
+      throw new Error(`Workflow "${workflow.id}": source.startUrl or source.sections is required`);
     }
 
     const maxLinks =
@@ -161,13 +165,15 @@ export async function fetchWorkflowItems(
       {
         type: "sina",
         startUrl: workflow.source.startUrl,
+        sections: workflow.source.sections,
         linkSelectors: workflow.source.linkSelectors,
         maxLinks,
         detailConcurrency: workflow.source.detailConcurrency,
         detailDelayMs: workflow.source.detailDelayMs,
         detailRetries: workflow.source.detailRetries,
         waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
-        userAgent: workflow.source.userAgent
+        userAgent: workflow.source.userAgent,
+        headless: workflow.source.headless
       },
       { onProgress: opts.onProgress }
     );
@@ -355,6 +361,35 @@ export async function fetchWorkflowItems(
         retries: workflow.source.retries,
         waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
         userAgent: workflow.source.userAgent
+      },
+      { onProgress: opts.onProgress }
+    );
+  }
+
+  if (workflow.source.type === "gamelook") {
+    if (!workflow.source.listUrlTemplate) {
+      throw new Error(`Workflow "${workflow.id}": source.listUrlTemplate is required`);
+    }
+
+    const maxItems =
+      typeof opts.limit === "number"
+        ? Math.min(workflow.source.maxItems ?? opts.limit, opts.limit)
+        : workflow.source.maxItems;
+
+    return await fetchGamelook(
+      {
+        type: "gamelook",
+        listUrlTemplate: workflow.source.listUrlTemplate,
+        pageFrom: workflow.source.pageFrom,
+        pageTo: workflow.source.pageTo,
+        maxItems,
+        requestDelayMs: workflow.source.requestDelayMs,
+        retries: workflow.source.retries,
+        waitBetweenTriesMs: workflow.source.waitBetweenTriesMs,
+        userAgent: workflow.source.userAgent,
+        detailConcurrency: workflow.source.detailConcurrency,
+        detailDelayMs: workflow.source.detailDelayMs,
+        detailRetries: workflow.source.detailRetries
       },
       { onProgress: opts.onProgress }
     );

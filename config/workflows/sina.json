@@ -5,11 +5,15 @@
   "scheduleTimezone": "Asia/Ho_Chi_Minh",
   "source": {
     "type": "sina",
-    "startUrl": "https://www.sina.com.cn/",
-    "linkSelectors": [
-      "ul.list-a.slide-a.list-a-201406121603",
-      "ul.bd.list-b",
-      "ul.uni-blk-list02.list-a"
+    "sections": [
+      { "startUrl": "https://eladies.sina.com.cn/" },
+      { "startUrl": "https://auto.sina.com.cn/info/" },
+      { "startUrl": "https://fashion.sina.com.cn/" },
+      {
+        "startUrl": "https://tech.sina.com.cn/chuangshiji/",
+        "pagination": { "type": "feedCardPage", "pageFrom": 1, "pageTo": 5 }
+      },
+      { "startUrl": "https://mil.news.sina.com.cn/" }
     ],
     "maxLinks": 50,
     "detailConcurrency": 1,
@@ -32,4 +36,3 @@
     }
   }
 }
-
