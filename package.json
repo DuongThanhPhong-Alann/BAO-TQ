@@ -28,7 +28,7 @@
     "allbao": "npm run run:sohu && npm run run:gameres && npm run run:gnn && npm run run:fxbaogao && npm run run:dy && npm run run:afk-tin-game && npm run run:gamelook && npm run run:sina",
     "schedule": "node dist/index.js schedule",
     "preschedule:allbao": "npm run build",
-    "schedule:allbao": "node dist/index.js schedule-allbao 09:22"
+    "schedule:allbao": "node dist/index.js schedule-allbao 01:10"
   },
   "keywords": [],
   "author": "",
