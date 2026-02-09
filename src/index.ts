@@ -1,9 +1,14 @@
 import "dotenv/config";
 import { scheduleAllbao } from "./allbao";
+import { runAllafk, scheduleAllafk } from "./allafk";
 import { scheduleAllWorkflows } from "./scheduler";
 import { loadWorkflows } from "./workflows/loader";
 import { runWorkflowById } from "./workflows/runner";
 import { previewWorkflowById } from "./workflows/preview";
+
+function blockForever(): Promise<never> {
+  return new Promise(() => {});
+}
 
 function usage(): never {
   console.error(
@@ -14,13 +19,19 @@ function usage(): never {
       "  npm run dev -- preview <workflowId> [limit]",
       "  npm run dev -- schedule",
       "  npm run dev -- schedule-allbao [HH:MM]",
+      "  npm run dev -- run-allafk",
+      "  npm run dev -- schedule-allafk [HH:MM]",
+      "  npm run dev -- schedule-bao-afk [baoTime HH:MM] [afkTime HH:MM]",
       "",
       "Built (prod):",
       "  node dist/index.js list",
       "  node dist/index.js run sohu",
       "  node dist/index.js preview sohu 5",
       "  node dist/index.js schedule",
-      "  node dist/index.js schedule-allbao 09:21"
+      "  node dist/index.js schedule-allbao 09:21",
+      "  node dist/index.js run-allafk",
+      "  node dist/index.js schedule-allafk 21:00",
+      "  node dist/index.js schedule-bao-afk 01:10 21:00"
     ].join("\n")
   );
   process.exit(2);
@@ -61,7 +72,27 @@ async function main() {
 
   if (command === "schedule-allbao") {
     const time = arg1;
-    await scheduleAllbao(workflows, { time, runOnStart: false });
+    await scheduleAllbao(workflows, { time, runOnStart: false, block: true });
+    return;
+  }
+
+  if (command === "run-allafk") {
+    await runAllafk(workflows);
+    return;
+  }
+
+  if (command === "schedule-allafk") {
+    const time = arg1;
+    await scheduleAllafk(workflows, { time, runOnStart: false, block: true });
+    return;
+  }
+
+  if (command === "schedule-bao-afk") {
+    const baoTime = arg1;
+    const afkTime = arg2;
+    await scheduleAllbao(workflows, { time: baoTime, runOnStart: false, block: false });
+    await scheduleAllafk(workflows, { time: afkTime, runOnStart: false, block: false });
+    await blockForever();
     return;
   }
 

@@ -3,18 +3,16 @@ import { logger } from "./logger";
 import { WorkflowConfig } from "./workflows/types";
 import { runWorkflowById } from "./workflows/runner";
 
-const DEFAULT_TIME = "09:21";
+const DEFAULT_TIME = "21:00";
 const DEFAULT_TIMEZONE = "Asia/Ho_Chi_Minh";
 
-const ALLBAO_WORKFLOW_IDS = [
-  "sohu",
-  "gameres",
-  "gnn",
-  "fxbaogao",
-  "dy",
-  "afk-tin-game",
-  "gamelook",
-  "sina"
+const ALLAFK_WORKFLOW_IDS = [
+  "gamek-gk",
+  "afk-lichgame",
+  "afk-h5",
+  "afk-mobile",
+  "afk-topgame",
+  "afk-tin-game"
 ] as const;
 
 function parseHHMM(input: string): { hour: number; minute: number } {
@@ -33,13 +31,13 @@ function hhmmToCronExpr(hhmm: string): string {
   return `${minute} ${hour} * * *`;
 }
 
-export async function runAllbao(workflows: WorkflowConfig[]): Promise<void> {
-  for (const id of ALLBAO_WORKFLOW_IDS) {
+export async function runAllafk(workflows: WorkflowConfig[]): Promise<void> {
+  for (const id of ALLAFK_WORKFLOW_IDS) {
     await runWorkflowById(workflows, id);
   }
 }
 
-export async function scheduleAllbao(
+export async function scheduleAllafk(
   workflows: WorkflowConfig[],
   opts?: { time?: string; timezone?: string; runOnStart?: boolean; block?: boolean }
 ): Promise<void> {
@@ -51,29 +49,29 @@ export async function scheduleAllbao(
 
   const runOnce = async () => {
     if (isRunning) {
-      logger.warn({ schedule: "allbao" }, "Skipped run because previous run is still in progress");
+      logger.warn({ schedule: "allafk" }, "Skipped run because previous run is still in progress");
       return;
     }
 
     isRunning = true;
     const startedAt = new Date().toISOString();
     logger.info(
-      { schedule: "allbao", startedAt, workflows: ALLBAO_WORKFLOW_IDS },
-      "Allbao run started"
+      { schedule: "allafk", startedAt, workflows: ALLAFK_WORKFLOW_IDS },
+      "Allafk run started"
     );
 
     try {
-      await runAllbao(workflows);
-      logger.info({ schedule: "allbao", startedAt }, "Allbao run finished");
+      await runAllafk(workflows);
+      logger.info({ schedule: "allafk", startedAt }, "Allafk run finished");
     } catch (err) {
-      logger.error({ err, schedule: "allbao", startedAt }, "Allbao run failed");
+      logger.error({ err, schedule: "allafk", startedAt }, "Allafk run failed");
     } finally {
       isRunning = false;
     }
   };
 
   cron.schedule(expr, runOnce, { timezone });
-  logger.info({ schedule: "allbao", cron: expr, timezone }, "Allbao scheduler running");
+  logger.info({ schedule: "allafk", cron: expr, timezone }, "Allafk scheduler running");
 
   if (opts?.runOnStart) {
     await runOnce();

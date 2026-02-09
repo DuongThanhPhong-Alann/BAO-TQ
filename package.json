@@ -26,9 +26,15 @@
     "run:sina": "node dist/index.js run sina",
     "preallbao": "npm run build",
     "allbao": "npm run run:sohu && npm run run:gameres && npm run run:gnn && npm run run:fxbaogao && npm run run:dy && npm run run:afk-tin-game && npm run run:gamelook && npm run run:sina",
+    "preallafk": "npm run build",
+    "allafk": "node dist/index.js run-allafk",
     "schedule": "node dist/index.js schedule",
     "preschedule:allbao": "npm run build",
-    "schedule:allbao": "node dist/index.js schedule-allbao 01:10"
+    "schedule:allbao": "node dist/index.js schedule-allbao 01:10",
+    "preschedule:allafk": "npm run build",
+    "schedule:allafk": "node dist/index.js schedule-allafk 21:00",
+    "preschedule:bao-afk": "npm run build",
+    "schedule:bao-afk": "node dist/index.js schedule-bao-afk 01:10 21:00"
   },
   "keywords": [],
   "author": "",
